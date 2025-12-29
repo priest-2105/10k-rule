@@ -75,12 +75,15 @@ export const notificationService = {
       .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
     try {
+      // Cancel existing and reschedule with updated content
+      await Notifications.cancelNotificationAsync('counting-session');
       await Notifications.scheduleNotificationAsync({
         content: {
           title: `Counting: ${skill.title}`,
           body: `Total: ${timeString} | Session: ${formatTime(elapsedSeconds)}`,
           data: { skillId: skill.id },
           sticky: true,
+          ongoing: Platform.OS === 'android', // Android: make it ongoing/persistent
         },
         trigger: null,
         identifier: 'counting-session',
