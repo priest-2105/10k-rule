@@ -14,6 +14,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming, Eas
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { storage } from '@/utils/storage';
+import { notificationService } from '@/utils/notifications';
 import { Skill, DailyLog } from '@/types';
 
 export default function CountingScreen() {
@@ -65,11 +66,26 @@ export default function CountingScreen() {
         -1,
         true
       );
+      // Start notification
+      notificationService.startCountingNotification(skill);
+      
+      // Update notification every 10 seconds
+      const notificationInterval = setInterval(() => {
+        if (skill && skill.isActive) {
+          notificationService.updateCountingNotification(skill);
+        }
+      }, 10000);
+
+      return () => {
+        clearInterval(notificationInterval);
+      };
     } else {
       stopTimer();
       // Stop pulsing animation
       pulseScale.value = withTiming(1, { duration: 300 });
       pulseOpacity.value = withTiming(0.1, { duration: 300 });
+      // Stop notification
+      notificationService.stopCountingNotification();
     }
 
     return () => {
@@ -106,25 +122,18 @@ export default function CountingScreen() {
         appStateRef.current.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
-        // App came to foreground
+        // App came to foreground - update elapsed time from startTime
         if (skill && skill.isActive && skill.startTime && !isPaused) {
           const now = Date.now();
           const elapsed = Math.floor((now - skill.startTime) / 1000);
           setElapsedSeconds(elapsed);
-          // Don't reset unsavedSessionSeconds - it should persist
-        }
-      } else if (
-        appStateRef.current === 'active' &&
-        nextAppState.match(/inactive|background/)
-      ) {
-        // App went to background
-        if (skill && skill.isActive && !isPaused) {
-          setBackgroundTime(Date.now());
-          // Save current elapsed to unsaved when going to background
-          setUnsavedSessionSeconds(prev => prev + elapsedSeconds);
-          setElapsedSeconds(0);
+          // Update notification
+          if (skill) {
+            notificationService.updateCountingNotification(skill);
+          }
         }
       }
+      // Don't pause when going to background - keep counting!
       appStateRef.current = nextAppState;
     });
 
@@ -156,10 +165,10 @@ export default function CountingScreen() {
     if (isPaused) {
       // Resume - continue from where we paused
       const now = Date.now();
-      // Start fresh timer, but keep unsavedSessionSeconds for display
-      const newStartTime = now;
+      // Calculate new start time accounting for unsaved seconds
+      const totalElapsed = unsavedSessionSeconds;
+      const newStartTime = now - totalElapsed * 1000;
       setSessionStartTime(newStartTime);
-      // elapsedSeconds will start from 0, but unsavedSessionSeconds is preserved
       
       const updatedSkill = {
         ...skill,
@@ -169,8 +178,11 @@ export default function CountingScreen() {
       };
       
       await storage.saveSkill(updatedSkill);
+      await storage.setActiveSkillId(skill.id);
       setSkill(updatedSkill);
       setIsPaused(false);
+      // Start notification
+      notificationService.startCountingNotification(updatedSkill);
     } else {
       // Pause - save current elapsed to unsavedSessionSeconds
       stopTimer();
@@ -185,6 +197,8 @@ export default function CountingScreen() {
       
       await storage.saveSkill(updatedSkill);
       setSkill(updatedSkill);
+      // Stop notification
+      notificationService.stopCountingNotification();
     }
   };
 

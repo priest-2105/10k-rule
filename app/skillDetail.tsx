@@ -114,6 +114,7 @@ export default function SkillDetailScreen() {
 
   const progress = Math.min(skill.totalMinutes / 10000, 1);
   const canStart = activeSkillId === null || activeSkillId === skill.id;
+  const isActive = activeSkillId === skill.id || skill.isActive;
 
   return (
     <ThemedView style={styles.container}>
@@ -124,6 +125,17 @@ export default function SkillDetailScreen() {
           fadeOut
         />
       )}
+      
+      <View style={[styles.header, isDark && styles.headerDark]}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
+          <Ionicons name="chevron-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
+        </TouchableOpacity>
+        <ThemedText style={styles.headerTitle}>Skill Details</ThemedText>
+        <View style={styles.headerPlaceholder} />
+      </View>
       
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <View style={styles.progressSection}>
@@ -184,7 +196,7 @@ export default function SkillDetailScreen() {
         >
           <Ionicons name="play" size={20} color="#FFFFFF" />
           <ThemedText style={styles.startButtonText}>
-            {activeSkillId === skill.id ? 'Continue Counting' : 'Start Counting'}
+            {isActive ? 'Continue Counting' : 'Start Counting'}
           </ThemedText>
         </TouchableOpacity>
 
@@ -224,6 +236,29 @@ export default function SkillDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 60,
+    paddingBottom: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E5EA',
+  },
+  headerDark: {
+    borderBottomColor: '#38383A',
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  headerPlaceholder: {
+    width: 40,
   },
   scrollView: {
     flex: 1,
