@@ -224,6 +224,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+    // SafeAreaView will handle bottom padding, but we add a bit more for tab bar
+    marginBottom: 8,
   },
   fabDark: {
     shadowColor: '#FF9500',
