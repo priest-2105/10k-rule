@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -148,7 +148,14 @@ export default function CountingScreen() {
     }
 
     intervalRef.current = setInterval(() => {
-      setElapsedSeconds((prev) => prev + 1);
+      // Update elapsed based on startTime for accuracy (works even in background)
+      if (skill && skill.isActive && skill.startTime) {
+        const now = Date.now();
+        const elapsed = Math.floor((now - skill.startTime) / 1000);
+        setElapsedSeconds(elapsed);
+      } else {
+        setElapsedSeconds((prev) => prev + 1);
+      }
     }, 1000);
   };
 
@@ -249,6 +256,9 @@ export default function CountingScreen() {
       await storage.setActiveSkillId(null);
     }
 
+    // Stop notification
+    notificationService.stopCountingNotification();
+
     // Reset session tracking
     setUnsavedSessionSeconds(0);
     setElapsedSeconds(0);
@@ -267,10 +277,20 @@ export default function CountingScreen() {
       .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Display total: saved minutes + unsaved session seconds + current elapsed seconds
-  const totalDisplaySeconds = skill
-    ? Math.floor(skill.totalMinutes * 60) + unsavedSessionSeconds + elapsedSeconds
-    : unsavedSessionSeconds + elapsedSeconds;
+  // Display total: saved minutes + current elapsed from startTime (if active) or unsaved + elapsed
+  const totalDisplaySeconds = useMemo(() => {
+    if (!skill) return unsavedSessionSeconds + elapsedSeconds;
+    
+    if (skill.isActive && skill.startTime && !isPaused) {
+      // Calculate from startTime for accuracy
+      const now = Date.now();
+      const currentElapsed = Math.floor((now - skill.startTime) / 1000);
+      return Math.floor(skill.totalMinutes * 60) + currentElapsed;
+    } else {
+      // Use unsaved + elapsed for paused state
+      return Math.floor(skill.totalMinutes * 60) + unsavedSessionSeconds + elapsedSeconds;
+    }
+  }, [skill, elapsedSeconds, unsavedSessionSeconds, isPaused]);
 
   if (!skill) {
     return (
