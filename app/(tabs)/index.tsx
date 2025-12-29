@@ -8,6 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -142,40 +143,45 @@ export default function HomeScreen() {
   );
 
   return (
-    <ThemedView style={styles.container}>
-      <FlatList
-        data={skills}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={skills.length === 0 ? styles.emptyList : styles.list}
-        ListEmptyComponent={renderEmptyState}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      />
-      
-      <TouchableOpacity
-        style={[styles.fab, isDark && styles.fabDark]}
-        onPress={handleAddSkill}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="add" size={32} color="#FFFFFF" />
-      </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <ThemedView style={styles.container}>
+        <FlatList
+          data={skills}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={skills.length === 0 ? styles.emptyList : styles.list}
+          ListEmptyComponent={renderEmptyState}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        />
+        
+        <TouchableOpacity
+          style={[styles.fab, isDark && styles.fabDark]}
+          onPress={handleAddSkill}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="add" size={32} color="#FFFFFF" />
+        </TouchableOpacity>
 
-      <DeleteConfirmModal
-        visible={deleteModalVisible}
-        skillTitle={skillToDelete?.title || ''}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => {
-          setDeleteModalVisible(false);
-          setSkillToDelete(null);
-        }}
-      />
-    </ThemedView>
+        <DeleteConfirmModal
+          visible={deleteModalVisible}
+          skillTitle={skillToDelete?.title || ''}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => {
+            setDeleteModalVisible(false);
+            setSkillToDelete(null);
+          }}
+        />
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },

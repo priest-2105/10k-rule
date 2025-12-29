@@ -8,6 +8,7 @@ import {
   AppStateStatus,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming, Easing } from 'react-native-reanimated';
@@ -301,17 +302,18 @@ export default function CountingScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={[styles.header, { zIndex: 10 }]}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Ionicons name="chevron-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
-        </TouchableOpacity>
-        <ThemedText style={styles.skillName}>{skill.title}</ThemedText>
-        <View style={styles.placeholder} />
-      </View>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <ThemedView style={styles.container}>
+        <View style={[styles.header, { zIndex: 10 }]}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backButton}
+          >
+            <Ionicons name="chevron-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
+          </TouchableOpacity>
+          <ThemedText style={styles.skillName}>{skill.title}</ThemedText>
+          <View style={styles.placeholder} />
+        </View>
 
       <View style={styles.timerContainer}>
         <Animated.View
@@ -356,6 +358,9 @@ export default function CountingScreen() {
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -370,7 +375,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 60,
+    paddingTop: 8,
     paddingBottom: 20,
   },
   backButton: {

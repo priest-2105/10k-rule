@@ -10,6 +10,7 @@ import {
   useColorScheme,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -78,12 +79,13 @@ export default function AddSkillScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ThemedView style={styles.container}>
-        <View style={[styles.header, isDark && styles.headerDark]}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ThemedView style={styles.container}>
+          <View style={[styles.header, isDark && styles.headerDark]}>
           <TouchableOpacity
             onPress={() => router.back()}
             style={styles.cancelButton}
@@ -147,12 +149,16 @@ export default function AddSkillScreen() {
             />
           </View>
         </ScrollView>
-      </ThemedView>
-    </KeyboardAvoidingView>
+        </ThemedView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },

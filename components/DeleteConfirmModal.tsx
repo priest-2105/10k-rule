@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  StyleSheet,
   Modal,
+  StyleSheet,
   TouchableOpacity,
   useColorScheme,
-  Animated,
+  View,
 } from 'react-native';
 import * as Progress from 'react-native-progress';
 import { ThemedText } from './themed-text';
@@ -30,7 +29,7 @@ export function DeleteConfirmModal({
   const [progress, setProgress] = useState(0);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
   useEffect(() => {

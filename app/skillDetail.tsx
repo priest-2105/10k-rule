@@ -7,6 +7,7 @@ import {
   useColorScheme,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { format, differenceInDays } from 'date-fns';
 import ConfettiCannon from 'react-native-confetti-cannon';
@@ -117,16 +118,17 @@ export default function SkillDetailScreen() {
   const isActive = activeSkillId === skill.id || skill.isActive;
 
   return (
-    <ThemedView style={styles.container}>
-      {showConfetti && (
-        <ConfettiCannon
-          count={200}
-          origin={{ x: 0, y: 0 }}
-          fadeOut
-        />
-      )}
-      
-      <View style={[styles.header, isDark && styles.headerDark]}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <ThemedView style={styles.container}>
+        {showConfetti && (
+          <ConfettiCannon
+            count={200}
+            origin={{ x: 0, y: 0 }}
+            fadeOut
+          />
+        )}
+        
+        <View style={[styles.header, isDark && styles.headerDark]}>
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.backButton}
@@ -187,7 +189,7 @@ export default function SkillDetailScreen() {
         </View>
       </ScrollView>
 
-      <View style={[styles.actions, isDark && styles.actionsDark]}>
+      <ThemedView style={[styles.actions, isDark && styles.actionsDark]}>
         <TouchableOpacity
           style={[styles.actionButton, styles.startButton, !canStart && styles.buttonDisabled]}
           onPress={handleStartCounting}
@@ -221,19 +223,23 @@ export default function SkillDetailScreen() {
             </ThemedText>
           </TouchableOpacity>
         </View>
-      </View>
+      </ThemedView>
 
-      <DeleteConfirmModal
-        visible={deleteModalVisible}
-        skillTitle={skill.title}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteModalVisible(false)}
-      />
-    </ThemedView>
+        <DeleteConfirmModal
+          visible={deleteModalVisible}
+          skillTitle={skill.title}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setDeleteModalVisible(false)}
+        />
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },
@@ -242,7 +248,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 60,
+    paddingTop: 8,
     paddingBottom: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E5EA',
@@ -340,13 +346,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFFFFF',
     padding: 16,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#E5E5EA',
   },
   actionsDark: {
-    backgroundColor: '#000000',
     borderTopColor: '#38383A',
   },
   actionButton: {

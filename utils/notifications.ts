@@ -60,11 +60,16 @@ export const notificationService = {
 
   // Update the counting notification with current time
   async updateCountingNotification(skill: Skill): Promise<void> {
-    if (!skill.isActive || !skill.startTime) return;
+    // Fetch latest skill data from storage to ensure accuracy
+    const latestSkill = await storage.getSkill(skill.id);
+    if (!latestSkill || !latestSkill.isActive || !latestSkill.startTime) {
+      await this.stopCountingNotification();
+      return;
+    }
 
     const now = Date.now();
-    const elapsedSeconds = Math.floor((now - skill.startTime) / 1000);
-    const totalSeconds = skill.totalMinutes * 60 + elapsedSeconds;
+    const elapsedSeconds = Math.floor((now - latestSkill.startTime) / 1000);
+    const totalSeconds = latestSkill.totalMinutes * 60 + elapsedSeconds;
     
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -79,9 +84,9 @@ export const notificationService = {
       await Notifications.cancelNotificationAsync('counting-session');
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: `Counting: ${skill.title}`,
+          title: `Counting: ${latestSkill.title}`,
           body: `Total: ${timeString} | Session: ${formatTime(elapsedSeconds)}`,
-          data: { skillId: skill.id },
+          data: { skillId: latestSkill.id },
           sticky: true,
           ongoing: Platform.OS === 'android', // Android: make it ongoing/persistent
         },
